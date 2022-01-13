@@ -1,0 +1,242 @@
+<tool id="expression_measure" name="BARIC Expression measure" version="1.1.0">
+    <requirements>
+        <container type="singularity">oras://registry.forgemia.inra.fr/anthony.bretaudeau/singularity_expression_measure/singularity_expression_measure:latest</container>
+    </requirements>
+    <description></description>
+	<command><![CDATA[
+#import re
+
+perl '$__tool_directory__/expression_measure.pl'
+--skip_rdna 
+--reference=$genome 
+--annotation=$annotation 
+--rpkm=$rpkm_results  
+--count=$count_results  
+--orientation=$library.orientation
+  
+#if (str($library.orientation) == "ope" or str($library.orientation) == "pe"):
+    --mate_dist=$library.mate_dist 
+    --filenames="
+    #for $input_file in $library.readfiles:
+#set $identifier1 = re.sub('[^\w\-\s\.]', '_', str($input_file.readfile1.element_identifier))
+#set $identifier2 = re.sub('[^\w\-\s\.]', '_', str($input_file.readfile1.element_identifier))
+${identifier1},${identifier2},
+    #end for
+    "
+#else:
+    --filenames="
+    #for $input_file in $library.readfiles:
+#set $identifier1 = re.sub('[^\w\-\s\.]', '_', str($input_file.readfile1.element_identifier))
+${identifier1},
+    #end for
+    "
+#end if
+
+#if (str($library.orientation) == "ope"):
+    --oriented_end=$library.oriented_end 
+    --readfiles="
+    #for $input_file in $library.readfiles:
+${input_file.readfile1},${input_file.readfile2},
+    #end for
+    "
+#end if
+
+#if (str($library.orientation) == "ose"):
+    --oriented_end=$library.oriented_end 
+    --readfiles="
+    #for $input_file in $library.readfiles:
+${input_file.readfile1},
+    #end for
+    "
+#end if
+
+#if (str($library.orientation) == "pe"):
+    --readfiles="
+    #for $input_file in $library.readfiles:
+${input_file.readfile1},${input_file.readfile2},
+    #end for
+    "
+#end if
+
+#if (str($library.orientation) == "se"): 
+    --readfiles="
+    #for $input_file in $library.readfiles:
+${input_file.readfile1},
+    #end for
+    "
+#end if
+
+--level=$level
+--lmin=$lmin  
+--mmis=$mmis
+$small  
+
+## Advanced parameters
+#if (str($advanced.advanced_selector) == 'True'):
+    $advanced.nospecific 
+    --minimum_overlap_as_a_fraction_of_read_hit=$advanced.minimum_overlap_as_a_fraction_of_read_hit 
+#end if
+
+]]></command>
+    <inputs>
+        <conditional name="library">
+            <param label="Library type" name="orientation" type="select" value="se">
+                <option selected="true" value="se">Single end</option>
+                <option value="pe">Paired-end</option>
+                <option value="ope">Oriented Paired-end</option>
+                <option value="ose">Oriented Single-end</option>
+            </param>
+            <when value="ope">
+                <repeat name="readfiles" title="Oriented paired-end library" min="1" default="1">
+                    <param format="fastq,fastq.gz" help="fastq,fastq.gz" label="Read file 1" name="readfile1" type="data" />
+                    <param format="fastq,fastq.gz" help="fastq,fastq.gz" label="Read file 2" name="readfile2" type="data" />
+                </repeat>
+                <param help="Specification of the insert end which gives the orientation of the transcript (depends on protocols). WARNING: the oriented end can be 2 even on oriented single end (the one that is not in the data)"
+                    label="Oriented end" name="oriented_end" type="select" value="1">
+                    <option selected="true" value="1">Read file 1</option>
+                    <option value="2">Read file 2</option>
+                </param>
+                <param label="Maximal distance between paired reads (nt)" name="mate_dist" value="" type="integer">
+					<validator type="in_range" min="1" message="Insert size must be greater than 1"/>
+				</param>
+            </when>
+            <when value="ose">
+                <repeat name="readfiles" title="Oriented single-end library" min="1" default="1">
+                    <param format="fastq,fastq.gz" help="fastq,fastq.gz" label="Read file" name="readfile1" type="data" />
+                </repeat>
+                <param help="Specification of the insert end which gives the orientation of the transcript (depends on protocols). WARNING: the oriented end can be 2 even on oriented single end (the one that is not in the data)"
+                    label="Oriented end" name="oriented_end" type="select" value="1">
+                    <option selected="true" value="1">Read file 1</option>
+                    <option value="2">Read file 2</option>
+                </param>
+            </when>
+            <when value="pe">
+                <repeat name="readfiles" title="Paired-end library" min="1" default="1">
+                    <param format="fastq,fastq.gz" help="fastq,fastq.gz" label="Read file 1" name="readfile1" type="data" />
+                    <param format="fastq,fastq.gz" help="fastq,fastq.gz" label="Read file 2" name="readfile2" type="data" />
+                </repeat>
+                <param label="Maximal distance between paired reads (nt)" name="mate_dist" value="" type="integer">
+					<validator type="in_range" min="1" message="Insert size must be greater than 1"/>
+				</param>
+            </when>
+            <when value="se">
+                <repeat name="readfiles" title="Single-end library" min="1" default="1">
+                    <param format="fastq,fastq.gz" help="fastq,fastq.gz" label="Read file" name="readfile1" type="data" />
+                </repeat>
+            </when>
+        </conditional>
+        
+        <param name="genome" type="data" label="Reference genome file (fasta)" format="fasta" optional="false" />
+        <param name="annotation" type="data" label="Genome annotation file (GFF3)" format="gff3" optional="false" />
+        
+        <param help="Select biological objects (gff3 type) for which the expression is reported" label="Expression reported for" name="level" type="select" value="gene">
+            <option selected="true" value="gene">Gene</option>
+            <option value="RNA">RNA</option>
+        </param>
+        
+        <param checked="false" falsevalue="" help="18-30nt reads. Change mapping parameters" label="Small RNA analysis" name="small" optional="true" truevalue="--small" type="boolean" />
+        <param label="Minimal hit length" min="18" name="lmin" type="integer" value="18" />
+        <param label="Maximum number of mismatches" min="0" value="0" name="mmis" type="integer" />
+        
+        <conditional name="advanced">
+            <param label="Advanced parameters" name="advanced_selector" type="boolean" truevalue="True" />
+            <when value="True">
+                <param checked="false" falsevalue="" help="Considering all mapped read/pairs (default: considering unambigously mapped reads/pairs only)" label="Use no specific mapped reads" name="nospecific" optional="true" truevalue="--nospecific" type="boolean" />
+                <param help="Minimum overlap required as a fraction of the mapped read (intersecBed parameter -f)" label="Minimum overlap" max="1" min="0" name="minimum_overlap_as_a_fraction_of_read_hit" optional="true" type="float" value="1" />
+            </when>
+        </conditional>
+    </inputs>
+    <outputs>
+        <data format="tabular" help="Output directory" label="RNASeq Count expression" name="rpkm_results" type="data"></data>
+        <data format="tabular" help="Output directory" label="RNASeq Statistics" name="count_results" type="data"></data>
+    </outputs>
+    <stdio>
+        <exit_code level="fatal" range="1:"></exit_code>
+    </stdio>
+    <help>
+
+**Authors**: Jerome.Gouzy@toulouse.inra.fr
+
+Overview
+===============
+
+#. Reads mapping on reference
+
+#. Mapping hits filter
+
+#. Reads count and RPKM for each biologic objects (gene or rna) based on Annotation
+
+-----
+
+Input files
+===============
+
+**Read file(s)** Illumina RNAseq (fastq/fastq.gz format)
+
+**Reference genome** Genome reference sequence (fasta format)
+
+**Genome annotation** Genome reference annotation (GFF3 format)
+
+-----
+
+Output files
+===============
+
+**RNASeq Mapping Statistics** (csv format)
+
+**RNASeq Count expression** (csv format)
+
+-----
+
+Parameters
+===============
+
+**Library type** [ope,ose,se,pe] *default:* se
+
+Library type (Single end, Oriented Single-end, Paired-end, Oriented Paired-end).
+
+**Oriented end** [1,2] *default:* 1
+
+Specification of the insert end which gives the orientation of the transcript (depends on protocols). 
+
+.. class:: warningmark
+
+the oriented end can be 2 even on oriented single end (the one that is not in the data)
+
+**Maximal distance between paired reads** [integer] *min:* 1
+
+Maximal distance between paired reads.
+
+**Expression reported for** [gene,RNA] *default:* gene
+
+Select biological objects (gff3 type) for which the expression is reported.
+
+**Small RNA analysis** [boolean]
+
+Small RNA analysis. Reads between 18 and 30 nt.
+
+**Minimal hit length** [integer] *default:* 18 *min:* 18
+
+Minimal hit length for reads mapping.
+
+**Maximum number of mismatches** [integer] *default:* 0 *min:* 0
+
+Maximum number of mismatches for reads mapping.
+
+**Use no specific mapped reads** [boolean]
+
+Considering all mapped read/pairs (default: considering unambigously mapped reads/pairs only)
+
+**Minimum overlap** [float] *default:* 1 *min:* 0 *max:* 1
+
+Minimum overlap required as a fraction of the mapped read (intersecBed parameter -f)
+
+Schema
+======
+
+.. image:: static/images/bbric_expression_measure.png
+   :scale: 100 %
+   :alt: pipeline schema
+
+    </help>
+</tool>

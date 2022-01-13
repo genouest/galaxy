@@ -1,0 +1,26 @@
+<tool id="genolink" name="GenoLink" version="1.0.0">
+    <description>imports file from your GenOuest workspace to the current history WITHOUT copying</description>
+    <requirements>
+        <requirement type="package" version="5.26.2">perl</requirement>
+    </requirements>
+    <command><![CDATA[
+        perl '$__tool_directory__/genolink.pl' '${source}' '${dest}'
+    ]]></command>
+    <inputs>
+        <param name="source" type="text" size="100" value='/home/genouest/' label="Complete pathname" help="example : /home/genouest/username/mydir/myfic.ext" />
+    </inputs>
+    <outputs>
+        <data auto_format="true" name="dest" label="${tool.name}: ${source}" />
+    </outputs>
+    <help><![CDATA[
+**What it does**
+
+GenoLink imports a file from the Genouest cluster (/home, /omaha-beach, /groups, /scratch) into the current history. There is no copy, so the upload time is very short. Your uploaded file is neither deleted nor altered in your Home.
+
+This tool is only working with one input file. The tool crashes if a directory is found.
+
+Your file must be readable for others.
+
+If you move or remove the original file from the cluster, it will not be usable in Galaxy anymore.
+    ]]></help>
+</tool>

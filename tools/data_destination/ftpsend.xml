@@ -1,0 +1,29 @@
+<tool id="ftpsend" name="FTPSend" version="1.0.0">
+    <description>export history files to your galaxy FTP directory</description>
+    <requirements>
+        <requirement type="package" version="5.26.2">perl</requirement>
+    </requirements>
+    <command><![CDATA[
+        #import re
+
+        perl '$__tool_directory__/ftpsend.pl' $__app__.config.ftp_upload_dir '${subdir}' $__user_email__ '${logfile}'
+
+        #for $i in $files
+            #set filemame = re.sub('[^\w\-]', '_', str($i.element_identifier))
+            '${i}' '${i.hid}_${filemame}.${i.datatype.file_ext}'
+        #end for
+    ]]></command>
+    <inputs>
+	    <param name="files" type="data" multiple="true" label="Files to copy"/>
+        <param name="subdir" label="Directory in your FTP server" type="text" value="/" />
+    </inputs>
+    <outputs>
+        <data name="logfile" format="txt" />
+    </outputs>
+    <help><![CDATA[
+**What it does**
+
+FTPSend allows to export files into your FTP repository.
+
+    ]]></help>
+</tool>

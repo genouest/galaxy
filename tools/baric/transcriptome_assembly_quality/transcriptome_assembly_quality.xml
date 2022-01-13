@@ -1,0 +1,79 @@
+<tool id="baric_transcriptome_assembly_quality" name="BARIC Quality of transcriptome assembly" version="0.1">
+    <description></description>
+    <requirements>
+        <container type="singularity">oras://registry.forgemia.inra.fr/anthony.bretaudeau/singularity-transcriptome-quality/singularity-transcriptome-quality:latest</container>
+    </requirements>
+    <stdio>
+        <exit_code level="fatal" range="1:"></exit_code>
+    </stdio>
+    <command><![CDATA[
+        ln -s '$input' 'input.xml' &&
+        perl '$__tool_directory__/getOHR.pl' 'input.xml'
+    ]]></command>
+    <inputs>
+        <param format="xml" name="input" type="data" label="BLAST XML output file"/>
+    </inputs>
+    <outputs>
+        <data from_work_dir="OHRandBlastFeatures.csv" name="OHRandBlastFeatures.csv" label="OHRandBlastFeatures.csv" format="csv" type="data" optional="false"/>
+        <data from_work_dir="OHR_distribution.pdf" name="OHR_distribution.pdf" label="OHR_distribution.pdf" format="pdf" type="data" optional="false"/>
+    </outputs>
+    <help>
+
+Overview
+===============
+This tool calculates the Ortholog Hit Ratio (OHR) as defined by O'Neil et al. (2010, BMC Genomics, 11, 310: Population-level transcriptome sequencing of nonmodel organisms Erynnis propertius and Papilio zelicaon.). An OHR gives an indication about the quality of an assembled transcript (protein) sequence by comparison with a reference (in best case experimentally validated) protein sequence, ideally a sequence from a very close species to the input sequence. The OHR is calculated by taking the ratio of the ungapped query alignment against the length of the best protein hit in a reference BLAST database. In best case, if an assembled sequences fully reconstitutes a reference protein sequence, the OHR value will be equal to 1. An OHR close to 0 indicates that the assembled transcript is only partially reconstituted. On the other hand, an OHR bigger than 1 means that the assembled transcript is longer than the reference sequence. In the latter case, this can be an indication that the assembled transcript is a) better reconstitued, b) the reference is not the closest sequence but the closest sequence present in the database or c) the transcript is chimeric. In any case, interpretation of OHR >> 1 might need case by case verification.
+In detail, the following steps are executed in this program:
+
+1. Read the input BLAST file (XML format)
+
+2. For each transcript/protein sequence with at least one Hit the Ortholog Hit Ratio (OHR) is calculated. The OHR is defined by the ratio of the ungapped alignment of the query sequence divided by the entire length of the hit sequence
+
+3. Write BLAST details and OHR value for each input sequence with hit into the output file
+
+
+-----
+
+Input
+===============
+
+BLAST file in XML format: this file can either be a result from blastx or blastp. Ideally BLAST was applied against a database of reference protein sequences (experimentally validated). If no expert protein database is available NCBI NR (translation of NCBI NT) might be used, but the results may be less significant.
+
+
+
+-----
+
+Output
+===============
+
+The pipeline will report two output files:
+
+1)The file OHR_distribution.pdf contains a histogram depicting the distribution of OHR values of the analysed data [PDF].
+
+2)The file OhrAndBlastFeatures.csv gives a summary of OHR and BLAST details to each input sequence with BLAST hit [tabular].
+The following elements are listed in the columns of this output file:
+
+column 1: sequence id of the analysed input sequence (QueryID)
+
+column 2: accession number of the best BLAST hit (Hit AccNr)
+
+column 3: functional annotation of the best BLAST hit (HitFunction)
+
+column 4: Bit Score of the best HSP of the best BLAST hit (HitBitScore)
+
+column 5: e-value of the best HSP of the best BLAST hit (HitEvalue)
+
+column 6: start position of the alignment of the best HSP on the input sequence (QueryALNstart)
+
+column 7: end position of the alignment of the best HSP on the input sequence (QueryALNend)
+
+column 8: length of the ungapped alignement referred to the hit sequence (nonGapALNlength)
+
+column 9: identity of the alignment (Identity)
+
+column 10: Ortholog Hit Ratio (OHR)
+
+
+
+  </help>
+</tool>
+

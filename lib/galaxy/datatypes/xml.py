@@ -233,6 +233,89 @@ class Owl(GenericXml):
         """
         return file_prefix.search(OWL_MARKER)
 
+# Start logol class
+class Logol_model( GenericXml ):
+    """Logol model data"""
+    file_ext = "lgd"
+
+    def set_peek( self, dataset, is_multi_byte=False ):
+        """Set the peek and blurb text"""
+        if not dataset.dataset.purged:
+            dataset.peek = data.get_file_peek( dataset.file_name, is_multi_byte=is_multi_byte )
+            dataset.blurb = 'Logol model data'
+        else:
+            dataset.peek = 'file does not exist'
+            dataset.blurb = 'file purged from disk'
+    def sniff( self, filename ):
+        """
+        Determines whether the file is Logol model
+        """
+        #TODO - Use a context manager on Python 2.5+ to close handle
+        handle = open(filename)
+        line = handle.readline()
+        line = line.rstrip( '\n\r' )
+        handle.close()
+        if  line=="<mxGraphModel>":
+           return True
+        return False
+
+# End logol class
+
+# Start protomata classes
+class Proto( GenericXml ):
+    """Protomaton data"""
+    file_ext = "proto"
+
+    def set_peek( self, dataset, is_multi_byte=False ):
+        """Set the peek and blurb text"""
+        if not dataset.dataset.purged:
+            dataset.peek = data.get_file_peek( dataset.file_name, is_multi_byte=is_multi_byte )
+            dataset.blurb = 'Protomaton data'
+        else:
+            dataset.peek = 'file does not exist'
+            dataset.blurb = 'file purged from disk'
+
+    def sniff( self, filename ):
+        """
+        Determines whether the file is a protomaton file
+        
+       """
+        Protoxml_header = [ '<?xml version="1.0"?>', '<weighted_protomata version="v2.0 (1813)">' ]
+        for i, line in enumerate( file( filename ) ):
+            if i >= len(Protoxml_header ):
+                return True
+            line = line.rstrip( '\n\r' )
+            if line != Protoxml_header[ i ]:
+                return False
+
+class Plma( GenericXml ):
+    """Paloma data"""
+    file_ext = "plma"
+
+    def set_peek( self, dataset, is_multi_byte=False ):
+        """Set the peek and blurb text"""
+        if not dataset.dataset.purged:
+            dataset.peek = data.get_file_peek( dataset.file_name, is_multi_byte=is_multi_byte )
+            dataset.blurb = 'Paloma data'
+        else:
+            dataset.peek = 'file does not exist'
+            dataset.blurb = 'file purged from disk'
+
+    def sniff( self, filename ):
+        """
+        Determines whether the file is a protomaton file
+        
+       """
+        Protoxml_header = [ '<?xml version="1.0"?>', '<PLMA version="v2.0 (1813)">' ]
+        for i, line in enumerate( file( filename ) ):
+            if i >= len(Protoxml_header ):
+                return True
+            line = line.rstrip( '\n\r' )
+            if line != Protoxml_header[ i ]:
+                return False
+
+# End protomata classes
+
 
 class Sbml(GenericXml):
     """

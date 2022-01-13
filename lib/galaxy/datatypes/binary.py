@@ -1785,6 +1785,52 @@ class TwoBit(Binary):
         except Exception:
             return f"Binary TwoBit format nucleotide file ({nice_size(dataset.get_size())})"
 
+#adding NIB file format by CM
+class Nib (Binary):
+    """Class describing a nib format nucleotide file"""
+    
+    file_ext = "nib"
+    
+    def set_peek(self, dataset, is_multi_byte=False):
+        if not dataset.dataset.purged:
+            dataset.peek = "Binary Nib format nucleotide file"
+            dataset.blurb = data.nice_size(dataset.get_size())
+        else:
+            return super(TwoBit, self).set_peek(dataset, is_multi_byte)
+    def display_peek(self, dataset):
+        try:
+            return dataset.peek
+        except:
+            return "Binary Nib format nucleotide file (%s)" % (data.nice_size(dataset.get_size()))
+
+#adding udb file format by CM
+class Udb (Binary):
+    """Class describing a udb format created by or for usearch tool"""
+    
+    file_ext = "udb"
+    
+    def set_peek(self, dataset, is_multi_byte=False):
+        if not dataset.dataset.purged:
+            dataset.peek = "Binary udb format file"
+            dataset.blurb = data.nice_size(dataset.get_size())
+        else:
+            return super(Udb, self).set_peek(dataset, is_multi_byte)
+    def display_peek(self, dataset):
+        try:
+            return dataset.peek
+        except:
+            return "Binary Udb format file (%s)" % (data.nice_size(dataset.get_size()))
+
+#SINA datatypes
+class Arb (Binary):
+    file_ext = "arb"
+
+    @dataproviders.decorators.dataprovider_factory( 'sqlite', dataproviders.dataset.SQliteDataProvider.settings )
+    def sqlite_dataprovider( self, dataset, **settings ):
+        dataset_source = dataproviders.dataset.DatasetDataProvider( dataset )
+        return dataproviders.dataset.SQliteDataProvider( dataset_source, **settings )
+
+# End SINA datatypes
 
 @dataproviders.decorators.has_dataproviders
 class SQlite(Binary):

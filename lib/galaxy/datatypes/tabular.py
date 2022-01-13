@@ -1002,6 +1002,17 @@ class FeatureLocationIndex(Tabular):
     MetadataElement(name="columns", default=2, desc="Number of columns", readonly=True, visible=False)
     MetadataElement(name="column_types", default=['str', 'str'], param=metadata.ColumnTypesParameter, desc="Column types", readonly=True, visible=False, no_value=[])
 
+# Blat datatypes
+class Psl( Tabular ):
+    file_ext='psl'
+# End Blat datatypes
+
+# ISATAB file format
+class Isatab( Tabular ):
+    file_ext = 'isatab'
+    def __init__(self, **kwd):
+        """ISA-Tab format"""
+        Tabular.__init__( self, **kwd )
 
 @dataproviders.decorators.has_dataproviders
 class BaseCSV(TabularData):

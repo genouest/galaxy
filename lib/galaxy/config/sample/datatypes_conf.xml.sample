@@ -653,6 +653,29 @@
     <datatype extension="rdata.camera.negative" type="galaxy.datatypes.binary:RData" mimetype="application/x-gzip" subclass="true" display_in_upload="true"/>
     <datatype extension="rdata.camera.quick" type="galaxy.datatypes.binary:RData" mimetype="application/x-gzip" subclass="true" display_in_upload="true"/>
     <datatype extension="rdock_as" type="galaxy.datatypes.binary:Binary" description="rDock active site format" subclass="true" display_in_upload="true"/>
+    <!-- Start Protomata-Protomatch Datatypes -->
+    <datatype extension="proto" type="galaxy.datatypes.xml:Proto" display_in_upload="true"/>
+    <datatype extension="plma" type="galaxy.datatypes.xml:Plma" display_in_upload="true"/>
+    <!-- End Protomata-Protomatch Datatypes -->
+    <!-- Start Logol Datatypes -->
+    <datatype extension="lgd" type="galaxy.datatypes.xml:Logol_model" display_in_upload="true"/>
+    <datatype extension="logol" type="galaxy.datatypes.data:Logol_grammar" display_in_upload="true"/>
+    <!-- End Logol Datatypes -->
+    <!-- Start BLAT Datatypes -->
+    <datatype extension="nib" type="galaxy.datatypes.binary:Nib"  display_in_upload="true"/>
+    <datatype extension="psl" type="galaxy.datatypes.tabular:Psl"  display_in_upload="true"/>
+    <!-- End BLAT Datatypes -->
+    <!-- Start Multiplexing 454 Datatypes -->
+    <datatype extension="mid" type="galaxy.datatypes.data:Mid" display_in_upload="true"/>
+    <!-- End Multiplexing 454 Datatypes -->
+    <datatype extension="ace" type="galaxy.datatypes.data:Ace" display_in_upload="true"/>
+    <!-- usearch datatype -->
+    <datatype extension="udb" type="galaxy.datatypes.binary:Udb" display_in_upload="true"/>
+    <datatype extension="isatab" type="galaxy.datatypes.tabular:Isatab" display_in_upload="true" subclass="true"/>
+    <!-- SINA datatype -->
+    <datatype extension="arb" type="galaxy.datatypes.binary:Arb" display_in_upload="true"/>
+    <!-- End SINA datatype -->
+
     <datatype extension="oxlicg" type="galaxy.datatypes.binary:OxliCountGraph" mimetype="application/octet-stream" display_in_upload="true"/>
     <datatype extension="oxling" type="galaxy.datatypes.binary:OxliNodeGraph" mimetype="application/octet-stream" display_in_upload="true"/>
     <datatype extension="oxlits" type="galaxy.datatypes.binary:OxliTagSet" mimetype="application/octet-stream" display_in_upload="true"/>
@@ -1011,6 +1034,17 @@
     <sniffer type="galaxy.datatypes.proteomics:SPLib"/>
     <sniffer type="galaxy.datatypes.proteomics:TandemXML"/>
     <sniffer type="galaxy.datatypes.proteomics:ThermoRAW"/>
+    <!-- start protomatch sniffers -->
+    <sniffer type="galaxy.datatypes.xml:Proto"/>
+    <sniffer type="galaxy.datatypes.xml:Plma"/>
+    <!-- end protomatch sniffers -->
+    <!-- start logol sniffers -->
+    <sniffer type="galaxy.datatypes.xml:Logol_model"/>
+    <sniffer type="galaxy.datatypes.data:Logol_grammar"/>
+    <!-- end logol sniffers -->
+    <!-- Start BLAT sniffers -->
+    <!--sniffer type="galaxy.datatypes.tabular:Psl"/-->
+    <!-- End BLAT sniffers -->
     <sniffer type="galaxy.datatypes.proteomics:TraML"/>
     <sniffer type="galaxy.datatypes.proteomics:TrafoXML"/>
     <sniffer type="galaxy.datatypes.proteomics:UniProtXML"/>
@@ -1044,6 +1078,9 @@
     <sniffer type="galaxy.datatypes.sequence:FastqCSSanger"/>
     <sniffer type="galaxy.datatypes.sequence:FastqSanger"/>
     <sniffer type="galaxy.datatypes.sequence:Fastq"/>
+    <!-- start multiplexing 454 sniffers -->
+    <sniffer type="galaxy.datatypes.data:Mid"/>
+    <!-- end multiplexing 454 sniffers -->
     <sniffer type="galaxy.datatypes.interval:Wiggle"/>
     <sniffer type="galaxy.datatypes.text:Html"/>
     <sniffer type="galaxy.datatypes.images:Pdf"/>

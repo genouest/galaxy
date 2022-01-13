@@ -1107,3 +1107,117 @@ def get_file_peek(file_name, is_multi_byte=False, WIDTH=256, LINE_COUNT=5, skipc
                 lines.append(line)
                 count += 1
     return '\n'.join(lines) + ('\n' if last_line_break else '')
+
+#Start logol class
+
+class Logol_grammar( Text ):
+    """Logol grammar data"""
+    file_ext = "logol"
+
+    def set_peek( self, dataset, is_multi_byte=False ):
+        """Set the peek and blurb text"""
+        if not dataset.dataset.purged:
+            dataset.peek = get_file_peek( dataset.file_name, is_multi_byte=is_multi_byte )
+            dataset.blurb = 'Logol grammar data'
+        else:
+            dataset.peek = 'file does not exist'
+            dataset.blurb = 'file purged from disk'
+    def sniff( self, filename ):
+        """
+        Determines whether the file is Logol grammar
+        """
+        #TODO - Use a context manager on Python 2.5+ to close handle
+        handle = open(filename)
+        line = handle.readline()
+        line = line.rstrip( '\n\r' )
+        handle.close()
+        if  line=="def:{":
+           return True
+        return False
+
+#End logol class
+
+#Start Multiplexing 454 class
+
+class Mid( Data ):
+    line_class = 'line'
+
+    def sniff( self, filename):
+        handle = open(filename,'r')
+        line = handle.readline()
+        patternStart=re.compile("^.*\{*")
+        patternLine=re.compile("^mid=\".+\",\"[ATCG]+\",\"[1-9]\"(,\"[ATCG]+\")*;")
+        if patternStart.match(line):
+                line = handle.readline()
+                if line.rstrip()=="{" or patternLine.match(line):
+                        lines = handle.readlines()
+                        for l in lines:
+                                if not patternLine.match(l.rstrip()):
+                                        if not l.rstrip()=="}":
+                                                return False
+                else:
+                        return False
+
+        else:
+                return False
+        return True
+
+    def get_mime(self):
+        """Returns the mime type of the datatype"""
+        return 'text/plain'
+
+    def set_peek( self, dataset, line_count=None, is_multi_byte=False, WIDTH=256, skipchars=[] ):
+        """
+        Set the peek.  This method is used by various subclasses of Text.
+        """
+        if not dataset.dataset.purged:
+            # The file must exist on disk for the get_file_peek() method
+            dataset.peek = get_file_peek( dataset.file_name, is_multi_byte=is_multi_byte, WIDTH=WIDTH, skipchars=skipchars )
+            if line_count is None:
+                # See if line_count is stored in the metadata
+                if dataset.metadata.data_lines:
+                    dataset.blurb = "%s %s" % ( util.commaify( str(dataset.metadata.data_lines) ), inflector.cond_plural(dataset.metadata.data_lines, self.line_class) )
+                else:
+                    # Number of lines is not known ( this should not happen ), and auto-detect is
+                    # needed to set metadata
+                    # This can happen when the file is larger than max_optional_metadata_filesize.
+                    if int(dataset.get_size()) <= 1048576:
+                        #Small dataset, recount all lines and reset peek afterward.
+                        lc = self.count_data_lines(dataset)
+                        dataset.metadata.data_lines = lc
+                        dataset.blurb = "%s %s" % ( util.commaify( str(lc) ), inflector.cond_plural(lc, self.line_class) )
+                    else:
+                        est_lines = self.estimate_file_lines(dataset)
+                        dataset.blurb = "~%s %s" % ( util.commaify(util.roundify(str(est_lines))), inflector.cond_plural(est_lines, self.line_class) )
+            else:
+                dataset.blurb = "%s %s" % ( util.commaify( str(line_count) ), inflector.cond_plural(line_count, self.line_class) )
+        else:
+            dataset.peek = 'file does not exist'
+            dataset.blurb = 'file purged from disk'
+
+    def count_data_lines(self, dataset):
+        """
+        Count the number of lines of data in dataset,
+        skipping all blank lines and comments.
+        """
+        data_lines = 0
+        for line in file( dataset.file_name ):
+            line = line.strip()
+            if line and not line.startswith( '#' ):
+                data_lines += 1
+        return data_lines
+#End Multiplexing 454 class
+
+
+class Ace( Text ):
+    """Ace croos assembly file"""
+    file_ext = "ace"
+
+    def set_peek( self, dataset, is_multi_byte=False ):
+        """Set the peek and blurb text"""
+        if not dataset.dataset.purged:
+            dataset.peek = get_file_peek( dataset.file_name, is_multi_byte=is_multi_byte )
+            dataset.blurb = 'Ace file'
+        else:
+            dataset.peek = 'file does not exist'
+            dataset.blurb = 'file purged from disk'
